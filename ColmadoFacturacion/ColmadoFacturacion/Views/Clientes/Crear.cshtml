@@ -1,0 +1,54 @@
+﻿@model ColmadoFacturacion.Models.Entities.Cliente
+@{
+    ViewData["Title"] = "Nuevo Cliente";
+}
+
+<h4><i class="fas fa-user-plus me-2 text-success"></i>Nuevo Cliente</h4>
+<hr />
+<div class="card shadow-sm" style="max-width:600px">
+    <div class="card-body">
+        <form asp-action="Crear" method="post">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label asp-for="Nombre" class="form-label">Nombre completo *</label>
+                    <input asp-for="Nombre" class="form-control" />
+                    <span asp-validation-for="Nombre" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Cedula" class="form-label">Cédula</label>
+                    <input asp-for="Cedula" class="form-control" placeholder="000-0000000-0" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="RNC" class="form-label">RNC (empresas)</label>
+                    <input asp-for="RNC" class="form-control" placeholder="000-00000-0" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Telefono" class="form-label">Teléfono</label>
+                    <input asp-for="Telefono" class="form-control" placeholder="809-000-0000" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Email" class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control" type="email" />
+                </div>
+                <div class="col-12">
+                    <label asp-for="Direccion" class="form-label">Dirección</label>
+                    <input asp-for="Direccion" class="form-control" />
+                </div>
+                <div class="col-12">
+                    <div class="form-check form-switch">
+                        <input asp-for="EsEmpresa" class="form-check-input" type="checkbox" />
+                        <label asp-for="EsEmpresa" class="form-check-label fw-bold text-primary">
+                            Es una empresa (requiere RNC para facturar)
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save me-1"></i>Guardar
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

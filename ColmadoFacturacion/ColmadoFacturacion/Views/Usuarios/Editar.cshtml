@@ -1,0 +1,40 @@
+﻿@model ColmadoFacturacion.Models.Entities.Usuario
+@{
+    ViewData["Title"] = "Editar Usuario";
+}
+
+<h4><i class="fas fa-user-edit me-2 text-primary"></i>Editar Usuario</h4>
+<hr />
+<div class="card shadow-sm" style="max-width:480px">
+    <div class="card-body">
+        <form asp-action="Editar" method="post">
+            <input type="hidden" name="UsuarioID" value="@Model.UsuarioID" />
+            <div class="mb-3">
+                <label class="form-label">Nombre de usuario</label>
+                <input name="NombreUsuario" value="@Model.NombreUsuario" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input name="Email" value="@Model.Email" type="email" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Rol</label>
+                <select name="RolID" asp-items="ViewBag.Roles" class="form-select"></select>
+            </div>
+            <div class="mb-3">
+                <div class="form-check form-switch">
+                    <input type="hidden" name="Activo" value="false" />
+                    <input class="form-check-input" type="checkbox" name="Activo" value="true"
+                    @(Model.Activo ? "checked" : "") />
+                    <label class="form-check-label">Usuario activo</label>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i>Actualizar
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

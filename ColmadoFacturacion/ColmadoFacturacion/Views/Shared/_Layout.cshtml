@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — Colmado</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="~/css/site.css" rel="stylesheet" />
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/"><i class="fas fa-store me-2"></i>Colmado</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="nav">
+                <ul class="navbar-nav me-auto">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Ventas" asp-action="Nueva"><i class="fas fa-cash-register me-1"></i>Nueva Venta</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Productos" asp-action="Index"><i class="fas fa-boxes me-1"></i>Productos</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Clientes" asp-action="Index"><i class="fas fa-users me-1"></i>Clientes</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Facturas" asp-action="Index"><i class="fas fa-file-invoice me-1"></i>Facturas</a></li>
+                        @if (User.IsInRole("Administrador") || User.IsInRole("Supervisor"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                    <i class="fas fa-cog me-1"></i>Gestión
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Empleados" asp-action="Index">
+                                            <i class="fas fa-id-badge me-2"></i>Empleados
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Proveedores" asp-action="Index">
+                                            <i class="fas fa-truck me-2"></i>Proveedores
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="CierresDiarios" asp-action="Index">
+                                            <i class="fas fa-calendar-check me-2"></i>Cierres Diarios
+                                        </a>
+                                    </li>
+                                    @if (User.IsInRole("Administrador"))
+                                    {
+                                        <li><hr class="dropdown-divider" /></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" asp-controller="Usuarios" asp-action="Index">
+                                                <i class="fas fa-users-cog me-2"></i>Usuarios del Sistema
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+                    }
+                </ul>
+                <ul class="navbar-nav">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li class="nav-item"><span class="nav-link text-warning"><i class="fas fa-user me-1"></i>@User.Identity.Name</span></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Logout">Salir</a></li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-3">
+        @if (TempData["Exito"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show">
+                <i class="fas fa-check-circle me-2"></i>@TempData["Exito"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @RenderBody()
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

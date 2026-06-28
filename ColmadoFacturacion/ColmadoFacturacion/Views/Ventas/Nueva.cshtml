@@ -1,0 +1,172 @@
+﻿@{
+    ViewData["Title"] = "Nueva Venta";
+}
+
+<div class="row">
+    <!-- Panel izquierdo: búsqueda de productos -->
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <i class="fas fa-barcode me-2"></i>Agregar Productos
+            </div>
+            <div class="card-body">
+                <input id="buscarProducto" class="form-control mb-3" placeholder="Buscar producto por nombre o código..." />
+                <table class="table table-hover table-sm" id="tblProductos">
+                    <thead><tr><th>Producto</th><th>Precio</th><th>Stock</th><th></th></tr></thead>
+                    <tbody>
+                        @foreach (var p in ViewBag.Productos)
+                        {
+                            <tr>
+                                <td>@p.Nombre</td>
+                                <td>RD$ @p.PrecioVenta.ToString("N2")</td>
+                                <td>@p.Stock</td>
+                                <td>
+                                    <button class="btn btn-sm btn-success btn-agregar"
+                                            data-id="@p.ProductoID" data-nombre="@p.Nombre"
+                                            data-precio="@p.PrecioVenta">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel derecho: carrito -->
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header bg-dark text-white"><i class="fas fa-shopping-cart me-2"></i>Carrito</div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <label class="form-label small">Cliente (opcional)</label>
+                    <select id="clienteID" class="form-select form-select-sm">
+                        <option value="">-- Cliente Mostrador --</option>
+                        @foreach (var c in ViewBag.Clientes)
+                        {
+                            <option value="@c.ClienteID">@c.Nombre</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">Empleado</label>
+                    <select id="empleadoID" class="form-select form-select-sm">
+                        @foreach (var e in ViewBag.Empleados)
+                        {
+                            <option value="@e.EmpleadoID">@e.Nombre</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="requiereFactura" />
+                    <label class="form-check-label text-danger fw-bold" for="requiereFactura">
+                        Requiere Factura (empresa / venta grande)
+                    </label>
+                </div>
+                <hr />
+                <table class="table table-sm" id="tblCarrito">
+                    <thead><tr><th>Producto</th><th>Cant.</th><th>Total</th><th></th></tr></thead>
+                    <tbody id="carritoBody"></tbody>
+                </table>
+                <div class="text-end">
+                    <strong>Subtotal: RD$ <span id="subtotal">0.00</span></strong><br />
+                    <strong class="text-danger">ITBIS: RD$ <span id="itbis">0.00</span></strong><br />
+                    <h5>Total: RD$ <span id="total">0.00</span></h5>
+                </div>
+                <button id="btnRegistrar" class="btn btn-success w-100 mt-2">
+                    <i class="fas fa-check-circle me-2"></i>Registrar Venta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let carrito = [];
+
+        document.getElementById('buscarProducto').addEventListener('input', function(){
+          const q = this.value.toLowerCase();
+          document.querySelectorAll('#tblProductos tbody tr').forEach(tr => {
+            tr.style.display = tr.innerText.toLowerCase().includes(q) ? '' : 'none';
+          });
+        });
+
+        document.querySelectorAll('.btn-agregar').forEach(btn => {
+          btn.addEventListener('click', function(){
+            const id = parseInt(this.dataset.id);
+            const nombre = this.dataset.nombre;
+            const precio = parseFloat(this.dataset.precio);
+            const existe = carrito.find(x => x.productoID === id);
+            if (existe) { existe.cantidad++; existe.subtotal = existe.cantidad * existe.precioUnitario; }
+            else { carrito.push({ productoID: id, nombre, cantidad: 1, precioUnitario: precio, descuento: 0, subtotal: precio }); }
+            renderCarrito();
+          });
+        });
+
+        function renderCarrito(){
+          const tbody = document.getElementById('carritoBody');
+          tbody.innerHTML = '';
+          let sub = 0;
+          carrito.forEach((item, i) => {
+            sub += item.subtotal;
+            tbody.innerHTML += `<tr>
+              <td>${item.nombre}</td>
+              <td><input type="number" min="1" value="${item.cantidad}" class="form-control form-control-sm qty-input" data-i="${i}" style="width:60px"/></td>
+              <td>RD$ ${item.subtotal.toFixed(2)}</td>
+              <td><button class="btn btn-sm btn-danger btn-quitar" data-i="${i}"><i class="fas fa-trash"></i></button></td>
+            </tr>`;
+          });
+          const factura = document.getElementById('requiereFactura').checked;
+          const itbis = factura ? sub * 0.18 : 0;
+          document.getElementById('subtotal').innerText = sub.toFixed(2);
+          document.getElementById('itbis').innerText = itbis.toFixed(2);
+          document.getElementById('total').innerText = (sub + itbis).toFixed(2);
+
+          document.querySelectorAll('.qty-input').forEach(inp => {
+            inp.addEventListener('change', function(){
+              const i = parseInt(this.dataset.i);
+              carrito[i].cantidad = parseInt(this.value);
+              carrito[i].subtotal = carrito[i].cantidad * carrito[i].precioUnitario;
+              renderCarrito();
+            });
+          });
+          document.querySelectorAll('.btn-quitar').forEach(btn => {
+            btn.addEventListener('click', function(){
+              carrito.splice(parseInt(this.dataset.i), 1);
+              renderCarrito();
+            });
+          });
+        }
+
+        document.getElementById('requiereFactura').addEventListener('change', renderCarrito);
+
+        document.getElementById('btnRegistrar').addEventListener('click', async () => {
+          if (carrito.length === 0) { alert('Agrega al menos un producto.'); return; }
+          const payload = {
+            clienteID: document.getElementById('clienteID').value || null,
+            empleadoID: parseInt(document.getElementById('empleadoID').value),
+            requiereFactura: document.getElementById('requiereFactura').checked,
+            detalles: carrito.map(x => ({
+              productoID: x.productoID, cantidad: x.cantidad,
+              precioUnitario: x.precioUnitario, descuento: x.descuento
+            }))
+          };
+          const resp = await fetch('/Ventas/Nueva', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '' },
+            body: JSON.stringify(payload)
+          });
+          const data = await resp.json();
+          if (data.success) {
+            alert(`Venta registrada exitosamente! ID: ${data.ventaID}`);
+            carrito = []; renderCarrito();
+          } else {
+            alert('Error: ' + data.message);
+          }
+        });
+    </script>
+}
